@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 01:02:59 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/20 06:35:53 by slazar           ###   ########.fr       */
+/*   Updated: 2023/11/23 22:05:01 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,18 @@ typedef struct s_rays
 typedef struct s_map
 {
 	char	**map;
+	int		i;
+	int		j;
+	char	*map_path;
+	int		map_width;
+	int		map_height;
+	int		fd_map;
 	char	*no;
 	char	*so;
 	char	*we;
 	char	*ea;
 	char	*s;
+	int 	flag;
 	int		f;
 	int		c;
 	int		r;
@@ -77,8 +84,12 @@ char	*my_filter(char *save);
 int		my_strchr(char *str, char c);
 char	*my_strjoin(char *save, char *bufer);
 int		my_strlen(char *str);
+/*-----split-----*/
+char	**my_split(char const *s);
+/*-----split-----*/
 /*-------------get_next_line-------------*/
 
 int		read_and_check(t_map *map);
+void	*ft_calloc(int count, int size);
 /*---------------------------parsing---------------------------------*/
 #endif
