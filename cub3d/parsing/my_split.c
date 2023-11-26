@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 21:16:23 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/22 22:33:25 by slazar           ###   ########.fr       */
+/*   Updated: 2023/11/25 21:07:44 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	return ((char *)sbs);
 }
 
-static int	word(char const *s)
+int	word(char const *s)
 {
 	int	i;
 	int	count;
@@ -54,9 +54,9 @@ static int	word(char const *s)
 	count = 0;
 	while (s[i])
 	{
-		while (s[i] && (s[i] == ' ' || s[i] == '\t'))
+		while (s[i] && s[i] != '\n' && (s[i] == ' ' || s[i] == '\t'))
 			i++;
-		if (s[i])
+		if (s[i] && s[i] != '\n')
 			count++;
 		while (s[i] && s[i] != ' ' && s[i] != '\t')
 			i++;
@@ -64,12 +64,12 @@ static int	word(char const *s)
 	return (count);
 }
 
-static int	len_word(const char *s, int i)
+int	len_word(const char *s, int i)
 {
 	int	len_s;
 
 	len_s = 0;
-	while (s[i] && s[i] != ' ' && s[i] != '\t')
+	while (s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n')
 	{
 		i++;
 		len_s++;

@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/19 22:33:05 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/23 22:31:00 by slazar           ###   ########.fr       */
+/*   Updated: 2023/11/26 13:07:11 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,9 @@ int	read_map(t_map *map)
 		map->map[i] = get_next_line(map->fd_map);
 		if (map->map[i++] == NULL)
 			break ;
-		printf("%s", map->map[i - 1]);
 	}
 	close(map->fd_map);
-	return (0); 
+	return (0);
 }
 
 int	check_path(char *str)
@@ -66,17 +65,17 @@ int	check_path(char *str)
 	return (0);
 }
 
-char	*ft_strdup(char *src)
+char	*ft_strdup(char *src, int size)
 {
 	int		index;
 	char	*dest;
 	char	*d;
 
 	index = 0;
-	d = ((dest = (char *)malloc(my_strlen(src) * sizeof(char) + 1)));
+	d = ((dest = (char *)malloc(size * sizeof(char) + 1)));
 	if (!d)
 		return (NULL);
-	while (src[index])
+	while (index < size)
 	{
 		dest[index] = src[index];
 		index++;
@@ -103,21 +102,16 @@ void	skip_spaces(char *str, int *j)
 		(*j)++;
 }
 
-void	skip_new_line(char *str, int *i)
-{
-	while (str[*i] == '\n')
-		(*i)++;
-}
-
 void init_null(t_map **map)
 {
 	(*map)->no = NULL;
 	(*map)->so = NULL;
 	(*map)->we = NULL;
 	(*map)->ea = NULL;
+	(*map)->f_flag = 0;
+	(*map)->c_flag = 0;
 	(*map)->i = 0;
 	(*map)->j = 0;
-	(*map)->flag = 0;
 	(*map)->f = 0;
 	(*map)->c = 0;
 	(*map)->r = 0;
@@ -147,47 +141,104 @@ int empty_line(char *str)
 	while (str[i] == '\t' || str[i] == ' ')
 		i++;
 	if (str[i] == '\n')
+
 		return (-1);
 	return (i);
 }
+int campare(char *str, char *str2)
+{
+	int	i;
+
+	i = 0;
+	while (str[i] && str2[i])
+	{
+		if (str[i] != str2[i])
+			return (1);
+		i++;
+	}
+	if (str[i] != str2[i])
+		return (1);
+	return (0);
+}
+
+void take_and_check(char **s, char *str)
+{
+	if (*s != NULL)
+		ft_error("\x1b[31mError\n\x1b[0mDuplicate texture\n");
+	*s = ft_strdup(str, my_strlen(str));
+}
+
+int tab_len(char **tab)
+{
+	int	i;
+
+	i = 0;
+	while (tab[i])
+		i++;
+	return (i);
+}
+
 int	check_line_tab(char **tab, t_map **map)
+{
+	printf("tabbbbbbbbbbbbbbbbbb\n");
+	if (tab_len(tab) == 2 && (campare(tab[0], "NO") || campare(tab[0], "SO") 
+		|| campare(tab[0], "WE") || campare(tab[0], "EA")))
+	{
+		if (!campare(tab[0], "NO"))
+			take_and_check(&(*map)->no, tab[1]);
+		else if (!campare(tab[0], "SO"))
+			take_and_check(&(*map)->so, tab[1]);
+		else if (!campare(tab[0], "WE"))
+			take_and_check(&(*map)->we, tab[1]);
+		else if (!campare(tab[0], "EA"))
+			take_and_check(&(*map)->ea, tab[1]);
+		return (0);
+	}
+	return (1);
+}
+int	check_f_c(char **tab, t_map **map)
 {
 	int	i;
 	int	j;
 
 	i = 0;
 	j = 0;
-
-	if (((tab[0][0] == 'N' && tab[0][1] == 'O' ) || (tab[0][0] == 'S' && tab[0][1] == 'O') || (tab[0][0] == 'W' && tab[0][1] == 'E') || (tab[0][0] == 'E' && tab[0][1] == 'A')) && tab[0][2] == '\0' && tab[1] != NULL && tab[2] == NULL)
+	if (tab_len(tab) == 2 && (campare(tab[0], "F") || campare(tab[0], "C")))
 	{
-		if (tab[0][0] == 'N' && tab[0][1] == 'O')
+		if (!campare(tab[0], "F"))
 		{
-			if((*map)->no != NULL)
-				ft_error("\x1b[31mError\n\x1b[0mDuplicate NO texture\n");
-			(*map)->no = ft_strdup(tab[1]);
+			(*map)->f_flag++;
+			if ((*map)->f_flag)
+				ft_error("\x1b[31mError\n\x1b[0mDuplicate floor color\n");
+			while (tab[1][i])
+			{
+				if (tab[1][i] == ',')
+					j++;
+				i++;
+			}
+			if (j != 2)
+				ft_error("\x1b[31mError\n\x1b[0mInvalid floor color\n");
+			(*map)->f = 1;
 		}
-		if (tab[0][0] == 'S' && tab[0][1] == 'O')
+		else if (!campare(tab[0], "C"))
 		{
-			if((*map)->so != NULL)
-				ft_error("\x1b[31mError\n\x1b[0mDuplicate SO texture\n");
-			(*map)->so = ft_strdup(tab[1]);
+			(*map)->c_flag++;
+			if ((*map)->c_flag > 1)
+				ft_error("\x1b[31mError\n\x1b[0mDuplicate ceiling color\n");
+			while (tab[1][i])
+			{
+				if (tab[1][i] == ',')
+					j++;
+				i++;
+			}
+			if (j != 2)
+				ft_error("\x1b[31mError\n\x1b[0mInvalid ceiling color\n");
+			(*map)->c = 1;
 		}
-		if (tab[0][0] == 'W' && tab[0][1] == 'E')
-		{
-			if((*map)->we != NULL)
-				ft_error("\x1b[31mError\n\x1b[0mDuplicate WE texture\n");	
-			(*map)->we = ft_strdup(tab[1]);
-		}
-		if (tab[0][0] == 'E' && tab[0][1] == 'A')
-		{
-			if((*map)->ea != NULL)
-				ft_error("\x1b[31mError\n\x1b[0mDuplicate EA texture\n");	
-			(*map)->ea = ft_strdup(tab[1]);
-		}
+		return (0);
 	}
-	return (0);
+	return (1);
 }
-
 void	no_so_we_ea(t_map **map)
 {
 	char	**tab;
@@ -195,22 +246,32 @@ void	no_so_we_ea(t_map **map)
 	int		j;
 	i = 0;
 	j = 0;
-	init_null(map);
 	while ((*map)->map[i])
 	{
 		if (empty_line((*map)->map[i]) == -1)
 			i++;
 		else
 		{
+			// printf("tab[%d] = %s", i, (*map)->map[i]);
 			tab = my_split((*map)->map[i]);
-			if(check_line_tab(tab, map))
+			if(j < 4 && check_line_tab(tab, map))
 				ft_error("\x1b[31mError\n\x1b[0mInvalid line in map\n");
+			if (check_f_c(tab, map) && j >= 4 && j < 6)
+				ft_error("\x1b[31mError\n\x1b[0mInvalid line in map\n");
+			j++;
+			i++;
 		}
 	}
+	printf("no = %s\n", (*map)->no);
+	printf("so = %s\n", (*map)->so);
+	printf("we = %s\n", (*map)->we);
+	printf("ea = %s\n", (*map)->ea);
+	printf("\n");
 }
 
 void	check_map (t_map *map)
 {
+	init_null(&map);
 	no_so_we_ea(&map);
 	// f_c(&map );
 	// map_test(&map);

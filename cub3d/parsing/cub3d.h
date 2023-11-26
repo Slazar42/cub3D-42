@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 01:02:59 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/23 22:05:01 by slazar           ###   ########.fr       */
+/*   Updated: 2023/11/26 10:18:39 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,8 @@ typedef struct s_map
 	char	*so;
 	char	*we;
 	char	*ea;
-	char	*s;
-	int 	flag;
+	int		f_flag;
+	int		c_flag;
 	int		f;
 	int		c;
 	int		r;
