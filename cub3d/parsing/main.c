@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/19 22:33:05 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/26 13:07:11 by slazar           ###   ########.fr       */
+/*   Updated: 2023/11/27 09:57:08 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,13 +108,13 @@ void init_null(t_map **map)
 	(*map)->so = NULL;
 	(*map)->we = NULL;
 	(*map)->ea = NULL;
-	(*map)->f_flag = 0;
-	(*map)->c_flag = 0;
-	(*map)->i = 0;
-	(*map)->j = 0;
-	(*map)->f = 0;
-	(*map)->c = 0;
-	(*map)->r = 0;
+	(*map)->f_r = NULL;
+	(*map)->f_g = NULL;
+	(*map)->f_b = NULL;
+	(*map)->c_r = NULL;
+	(*map)->c_g = NULL;
+	(*map)->c_b = NULL;
+	(*map)->count = 0;
 }
 void	*ft_calloc(int count, int size)
 {
@@ -180,7 +180,6 @@ int tab_len(char **tab)
 
 int	check_line_tab(char **tab, t_map **map)
 {
-	printf("tabbbbbbbbbbbbbbbbbb\n");
 	if (tab_len(tab) == 2 && (campare(tab[0], "NO") || campare(tab[0], "SO") 
 		|| campare(tab[0], "WE") || campare(tab[0], "EA")))
 	{
@@ -192,76 +191,50 @@ int	check_line_tab(char **tab, t_map **map)
 			take_and_check(&(*map)->we, tab[1]);
 		else if (!campare(tab[0], "EA"))
 			take_and_check(&(*map)->ea, tab[1]);
+		(*map)->count+=1;
 		return (0);
 	}
+	if(!campare(tab[0], "F") || !campare(tab[0], "C"))
+		return (0);
 	return (1);
 }
-int	check_f_c(char **tab, t_map **map)
+
+void check_f_c(char **tab, t_map **map, int i)
+{
+	if(!campare(tab[0], "F") && take_f_c(map, i))
+		
+}
+void free_this(char **tab)
 {
 	int	i;
-	int	j;
 
 	i = 0;
-	j = 0;
-	if (tab_len(tab) == 2 && (campare(tab[0], "F") || campare(tab[0], "C")))
+	while (tab[i])
 	{
-		if (!campare(tab[0], "F"))
-		{
-			(*map)->f_flag++;
-			if ((*map)->f_flag)
-				ft_error("\x1b[31mError\n\x1b[0mDuplicate floor color\n");
-			while (tab[1][i])
-			{
-				if (tab[1][i] == ',')
-					j++;
-				i++;
-			}
-			if (j != 2)
-				ft_error("\x1b[31mError\n\x1b[0mInvalid floor color\n");
-			(*map)->f = 1;
-		}
-		else if (!campare(tab[0], "C"))
-		{
-			(*map)->c_flag++;
-			if ((*map)->c_flag > 1)
-				ft_error("\x1b[31mError\n\x1b[0mDuplicate ceiling color\n");
-			while (tab[1][i])
-			{
-				if (tab[1][i] == ',')
-					j++;
-				i++;
-			}
-			if (j != 2)
-				ft_error("\x1b[31mError\n\x1b[0mInvalid ceiling color\n");
-			(*map)->c = 1;
-		}
-		return (0);
+		free(tab[i]);
+		i++;
 	}
-	return (1);
+	free(tab);
 }
+
 void	no_so_we_ea(t_map **map)
 {
-	char	**tab;
 	int		i;
-	int		j;
+	char	**tab;
 	i = 0;
-	j = 0;
 	while ((*map)->map[i])
 	{
-		if (empty_line((*map)->map[i]) == -1)
-			i++;
-		else
-		{
-			// printf("tab[%d] = %s", i, (*map)->map[i]);
-			tab = my_split((*map)->map[i]);
-			if(j < 4 && check_line_tab(tab, map))
-				ft_error("\x1b[31mError\n\x1b[0mInvalid line in map\n");
-			if (check_f_c(tab, map) && j >= 4 && j < 6)
-				ft_error("\x1b[31mError\n\x1b[0mInvalid line in map\n");
-			j++;
-			i++;
-		}
+		if (empty_line((*map)->map[i]) == -1 && i++)
+			continue ;
+		tab = my_split((*map)->map[i]);
+		if(check_line_tab(tab, map))
+			ft_error("\x1b[31mError\n\x1b[0mInvalid line in map\n");
+		if (check_f_c(tab, map, i))
+			ft_error("\x1b[31mError\n\x1b[0mInvalid line in map\n");
+		free_this(tab);
+		i++;
 	}
+
 	printf("no = %s\n", (*map)->no);
 	printf("so = %s\n", (*map)->so);
 	printf("we = %s\n", (*map)->we);
@@ -284,4 +257,5 @@ int	main(int ac, char **av)
 	check_args(ac, av, &map);
 	read_map(&map);
 	check_map(&map);
+	system("leaks cub3D");
 }

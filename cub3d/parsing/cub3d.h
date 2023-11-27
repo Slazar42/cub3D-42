@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 01:02:59 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/26 10:18:39 by slazar           ###   ########.fr       */
+/*   Updated: 2023/11/27 09:42:13 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,7 @@ typedef struct s_rays
 typedef struct s_map
 {
 	char	**map;
-	int		i;
-	int		j;
+	int		count;
 	char	*map_path;
 	int		map_width;
 	int		map_height;
@@ -66,11 +65,12 @@ typedef struct s_map
 	char	*so;
 	char	*we;
 	char	*ea;
-	int		f_flag;
-	int		c_flag;
-	int		f;
-	int		c;
-	int		r;
+	char 	*f_r;
+	char	*f_g;
+	char	*f_b;
+	char	*c_r;
+	char	*c_g;
+	char	*c_b;
 }t_map;
 
 /*-------------get_next_line-------------*/
