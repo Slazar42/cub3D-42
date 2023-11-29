@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 01:02:59 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/27 09:42:13 by slazar           ###   ########.fr       */
+/*   Updated: 2023/11/29 09:32:24 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,12 +65,8 @@ typedef struct s_map
 	char	*so;
 	char	*we;
 	char	*ea;
-	char 	*f_r;
-	char	*f_g;
-	char	*f_b;
-	char	*c_r;
-	char	*c_g;
-	char	*c_b;
+	int 	*floor_rgb;
+	int		*ceiling_rgb;
 }t_map;
 
 /*-------------get_next_line-------------*/
@@ -86,6 +82,8 @@ char	*my_strjoin(char *save, char *bufer);
 int		my_strlen(char *str);
 /*-----split-----*/
 char	**my_split(char const *s);
+char	*ft_substr(char const *s, unsigned int start, size_t len);
+char	**original_split(char const *s, char c);
 /*-----split-----*/
 /*-------------get_next_line-------------*/
 

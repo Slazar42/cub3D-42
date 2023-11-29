@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/19 22:33:05 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/27 09:57:08 by slazar           ###   ########.fr       */
+/*   Updated: 2023/11/29 16:45:17 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,12 +108,8 @@ void init_null(t_map **map)
 	(*map)->so = NULL;
 	(*map)->we = NULL;
 	(*map)->ea = NULL;
-	(*map)->f_r = NULL;
-	(*map)->f_g = NULL;
-	(*map)->f_b = NULL;
-	(*map)->c_r = NULL;
-	(*map)->c_g = NULL;
-	(*map)->c_b = NULL;
+	(*map)->ceiling_rgb = NULL;
+	(*map)->floor_rgb = NULL;
 	(*map)->count = 0;
 }
 void	*ft_calloc(int count, int size)
@@ -140,8 +136,7 @@ int empty_line(char *str)
 	i = 0;
 	while (str[i] == '\t' || str[i] == ' ')
 		i++;
-	if (str[i] == '\n')
-
+	if (str[i] == '\n' || str[i] == '\0')
 		return (-1);
 	return (i);
 }
@@ -150,15 +145,15 @@ int campare(char *str, char *str2)
 	int	i;
 
 	i = 0;
-	while (str[i] && str2[i])
+	while (str && str2 && str[i] && str2[i])
 	{
 		if (str[i] != str2[i])
 			return (1);
 		i++;
 	}
-	if (str[i] != str2[i])
-		return (1);
-	return (0);
+	if (str[i] == str2[i])
+		return (0);
+	return (1);
 }
 
 void take_and_check(char **s, char *str)
@@ -180,8 +175,8 @@ int tab_len(char **tab)
 
 int	check_line_tab(char **tab, t_map **map)
 {
-	if (tab_len(tab) == 2 && (campare(tab[0], "NO") || campare(tab[0], "SO") 
-		|| campare(tab[0], "WE") || campare(tab[0], "EA")))
+	if (tab_len(tab) == 2 && (!campare(tab[0], "NO") || !campare(tab[0], "SO") 
+		|| !campare(tab[0], "WE") || !campare(tab[0], "EA")))
 	{
 		if (!campare(tab[0], "NO"))
 			take_and_check(&(*map)->no, tab[1]);
@@ -195,14 +190,64 @@ int	check_line_tab(char **tab, t_map **map)
 		return (0);
 	}
 	if(!campare(tab[0], "F") || !campare(tab[0], "C"))
+	{
+		(*map)->count+=1;
 		return (0);
+	}
 	return (1);
 }
-
-void check_f_c(char **tab, t_map **map, int i)
+int valid_line(char **tab, char *str)
 {
-	if(!campare(tab[0], "F") && take_f_c(map, i))
-		
+	int i;
+	int c;
+	
+	i = -1;
+	c = 0;
+	while (str[++i])
+		if (str[i] == ',')
+			c++;
+	if (c != 2)
+		return (1);
+	i = 0;
+	while (str[i] == ' ' || str[i] == '\t' || str[i] == ',' 
+		|| str[i] == '\n' || (str[i] >= '0' && str[i] <= '9'))
+		i++;
+	if (str[i] != '\0')
+		return (1);
+	if(tab_len(tab) != 3)
+		return (1);
+	return (0);
+}
+int ft_atoi2(char *str)
+{
+	int	nb;
+	int i;
+	
+	i = 0;
+	nb = 0;
+	while (str[i] && (str[i] == ' ' || str[i] == '\t'))
+		i++;
+	while (str[i] && str[i] >= '0' && str[i] <= '9')
+	{
+		nb = nb * 10 + (str[i] - '0');
+		i++;
+	}
+	return (nb);
+}
+int *ft_atoi(char **tab)
+{
+	int	*rgb;
+	int	i;
+
+	i = 0;
+	rgb = malloc(sizeof(int) * 3);
+
+	while (tab[i])
+	{
+		rgb[i] = ft_atoi2(tab[i]);
+		i++;
+	}
+	return (rgb);
 }
 void free_this(char **tab)
 {
@@ -217,37 +262,59 @@ void free_this(char **tab)
 	free(tab);
 }
 
+void 	take_f_c(t_map **map, int i, char *str, char *fc)
+{
+	int j;
+	char **tab;
+
+	j = 0;
+	while((*map)->map[i][j] == ' ' || (*map)->map[i][j] == '\t' 
+		|| (*map)->map[i][j] == 'F' || (*map)->map[i][j] == 'C')
+		j++;
+	tab = original_split(str + j, ',');
+	if(valid_line(tab,str + j))
+		ft_error("\x1b[31mError\n\x1b[0mInvalid line in map\n");
+	if(fc[0] == 'C' && !(*map)->ceiling_rgb)
+		(*map)->ceiling_rgb = ft_atoi(tab);
+	else if(fc[0] == 'F' && !(*map)->floor_rgb)
+		(*map)->floor_rgb = ft_atoi(tab);
+	else if ((*map)->ceiling_rgb || (*map)->floor_rgb)
+		ft_error("\x1b[31mError\n\x1b[0mDuplicate floor or ceiling\n");
+	free_this(tab);
+}
+
+
 void	no_so_we_ea(t_map **map)
 {
 	int		i;
 	char	**tab;
-	i = 0;
-	while ((*map)->map[i])
+	i = -1;
+	while ((*map)->map[++i])
 	{
-		if (empty_line((*map)->map[i]) == -1 && i++)
+		if (empty_line((*map)->map[i]) == -1)
 			continue ;
 		tab = my_split((*map)->map[i]);
-		if(check_line_tab(tab, map))
+		if(check_line_tab(tab, map) && (*map)->count < 6)
 			ft_error("\x1b[31mError\n\x1b[0mInvalid line in map\n");
-		if (check_f_c(tab, map, i))
-			ft_error("\x1b[31mError\n\x1b[0mInvalid line in map\n");
+		if(!campare(tab[0], "F") || !campare(tab[0], "C"))
+			take_f_c(map, i, (*map)->map[i], tab[0]);
 		free_this(tab);
-		i++;
 	}
-
-	printf("no = %s\n", (*map)->no);
-	printf("so = %s\n", (*map)->so);
-	printf("we = %s\n", (*map)->we);
-	printf("ea = %s\n", (*map)->ea);
-	printf("\n");
+	i = -1;
+	while (++i < 3)
+	{
+		if((*map)->ceiling_rgb[i] > 255 || (*map)->ceiling_rgb[i] < 0)
+			ft_error("\x1b[31mError\n\x1b[0mInvalid ceiling color\n");
+		if((*map)->floor_rgb[i] > 255 || (*map)->floor_rgb[i] < 0)
+			ft_error("\x1b[31mError\n\x1b[0mInvalid floor color\n");
+	}
 }
 
 void	check_map (t_map *map)
 {
 	init_null(&map);
 	no_so_we_ea(&map);
-	// f_c(&map );
-	// map_test(&map);
+	map_test(&map);
 }
 
 int	main(int ac, char **av)
