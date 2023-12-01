@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 01:02:59 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/29 09:32:24 by slazar           ###   ########.fr       */
+/*   Updated: 2023/12/01 14:46:02 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <math.h>
+# include <stdbool.h>
 
 typedef struct t_player 
 {
@@ -56,7 +57,12 @@ typedef struct s_rays
 typedef struct s_map
 {
 	char	**map;
+	char 	**m;
+	int		m_size;
 	int		count;
+	int		p_x;
+	int		p_y;
+	char 	p_direction;
 	char	*map_path;
 	int		map_width;
 	int		map_height;
@@ -80,12 +86,12 @@ char	*my_filter(char *save);
 int		my_strchr(char *str, char c);
 char	*my_strjoin(char *save, char *bufer);
 int		my_strlen(char *str);
+/*-------------get_next_line-------------*/
 /*-----split-----*/
 char	**my_split(char const *s);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
 char	**original_split(char const *s, char c);
 /*-----split-----*/
-/*-------------get_next_line-------------*/
 
 int		read_and_check(t_map *map);
 void	*ft_calloc(int count, int size);

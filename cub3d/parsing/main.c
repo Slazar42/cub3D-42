@@ -6,12 +6,30 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/19 22:33:05 by slazar            #+#    #+#             */
-/*   Updated: 2023/11/29 16:45:17 by slazar           ###   ########.fr       */
+/*   Updated: 2023/12/01 14:53:10 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
+char	*ft_strdup(char *src, int size)
+{
+	int		index;
+	char	*dest;
+	char	*d;
+
+	index = 0;
+	d = ((dest = (char *)malloc(size * sizeof(char) + 1)));
+	if (!d)
+		return (NULL);
+	while (index < size)
+	{
+		dest[index] = src[index];
+		index++;
+	}
+	dest[index] = '\0';
+	return (dest);
+}
 void	ft_error(char *str)
 {
 	while (*str)
@@ -36,11 +54,23 @@ void	map_height(t_map **map)
 	(*map)->map[(*map)->map_height] = NULL;
 }
 
+void init_null(t_map **map)
+{
+	(*map)->no = NULL;
+	(*map)->so = NULL;
+	(*map)->we = NULL;
+	(*map)->ea = NULL;
+	(*map)->map_height = 0;
+	(*map)->ceiling_rgb = NULL;
+	(*map)->floor_rgb = NULL;
+	(*map)->count = 0;
+}
 int	read_map(t_map *map)
 {
 	int	i;
 
 	i = 0;
+	init_null(&map);
 	map_height(&map);
 	while (1)
 	{
@@ -65,24 +95,6 @@ int	check_path(char *str)
 	return (0);
 }
 
-char	*ft_strdup(char *src, int size)
-{
-	int		index;
-	char	*dest;
-	char	*d;
-
-	index = 0;
-	d = ((dest = (char *)malloc(size * sizeof(char) + 1)));
-	if (!d)
-		return (NULL);
-	while (index < size)
-	{
-		dest[index] = src[index];
-		index++;
-	}
-	dest[index] = '\0';
-	return (dest);
-}
 
 void	check_args(int ac, char	**av, t_map *map)
 {
@@ -102,16 +114,6 @@ void	skip_spaces(char *str, int *j)
 		(*j)++;
 }
 
-void init_null(t_map **map)
-{
-	(*map)->no = NULL;
-	(*map)->so = NULL;
-	(*map)->we = NULL;
-	(*map)->ea = NULL;
-	(*map)->ceiling_rgb = NULL;
-	(*map)->floor_rgb = NULL;
-	(*map)->count = 0;
-}
 void	*ft_calloc(int count, int size)
 {
 	char	*memory;
@@ -310,11 +312,130 @@ void	no_so_we_ea(t_map **map)
 	}
 }
 
+int map_1_0(char *str)
+{
+	int i;
+	
+	i = 0;
+	while (str[i] == ' ' || str[i] == '\t')
+		i++;
+	if(str[i] == '1' || str[i] == '0')
+		return (1);
+	return (0);
+}
+
+void	map_in_m(t_map **map)
+{
+	int i;
+	int c;
+	int j;
+	
+	j = -1;
+	i = -1;
+	c = 0;
+	while ((*map)->map[++i])
+		if (map_1_0((*map)->map[i]))
+			break;
+	while ((*map)->map[--(*map)->map_height])
+		if (map_1_0((*map)->map[(*map)->map_height]))
+			break;
+	(*map)->m_size = (*map)->map_height - i + 1;
+	(*map)->m = ft_calloc(((*map)->m_size + 1), sizeof(char *));
+	while (++j < (*map)->map_height - i + 1)
+		(*map)->m[j] = ft_strdup((*map)->map[i + j], my_strlen((*map)->map[i + j]));
+	(*map)->m[j] = NULL;
+	free_this((*map)->map);
+}
+void	map_positions(t_map *map)
+{
+	int	i;
+	int	j;
+
+	i = -1;
+	while (map->m[++i])
+	{
+		j = -1;
+		while (map->m[i][++j])
+		{
+			if (map->m[i][j] == 'N' || map->m[i][j] == 'S' 
+				|| map->m[i][j] == 'E' || map->m[i][j] == 'W')
+			{
+				map->p_x = i;
+				map->p_y = j;
+				map->p_direction = map->m[i][j];
+			}
+		}
+	}
+}
+void	map_test(t_map *map)
+{
+	int	i;
+	int	j;
+
+	i = -1;
+	while (map->m[++i])
+	{
+		if(empty_line(map->m[i]) == -1)
+			ft_error("\x1b[31mError\n\x1b[0mEmpty line in map\n");
+		j = -1;
+		while (map->m[i][++j])
+		{
+			if (map->m[i][j] != ' ' && map->m[i][j] != '1' 
+				&& map->m[i][j] != '0'  && map->m[i][j] != 'W' 
+				&& map->m[i][j] != 'N' && map->m[i][j] != 'S' 
+				&& map->m[i][j] != 'E' && map->m[i][j] != '\n')
+					ft_error("\x1b[31mError\n\x1b[0mInvalid character in map\n");
+		}
+	}
+}
+
+int len(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] != '\n' && str[i] != '\0')
+		i++;
+	while (str[--i] == ' ');
+	return (i+1);
+}
+
+bool is_valid(char c)
+{
+	if (c == '0' || c == 'N' || c == 'S' || c == 'E' || c == 'W')
+		return (true);
+	return (false);
+}
+
+void	valid_path(t_map *map)
+{
+	int i;
+	int j;
+	
+	i = -1;
+	while (map->m[++i])
+	{
+		j = -1;
+		while (map->m[i][++j] != '\n' && map->m[i][j] != '\0')
+		{
+			if (is_valid(map->m[i][j]))
+			{
+				if (i == 0 || i == map->m_size - 1 || j == 0 || j == len(map->m[i]) - 1 
+				|| map->m[i][j + 1] == ' ' || map->m[i][j - 1] == ' ' 
+				|| map->m[i + 1][j] == ' ' || map->m[i - 1][j] == ' ')
+					ft_error("\x1b[31mError\n\x1b[0mInvalid map\n");
+			}
+		}
+	}
+}
+
 void	check_map (t_map *map)
 {
-	init_null(&map);
 	no_so_we_ea(&map);
-	map_test(&map);
+	map_in_m(&map);
+	map_test(map);
+	map_positions(map);
+	valid_path(map);
 }
 
 int	main(int ac, char **av)
