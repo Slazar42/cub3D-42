@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 01:02:59 by slazar            #+#    #+#             */
-/*   Updated: 2023/12/01 14:46:02 by slazar           ###   ########.fr       */
+/*   Updated: 2023/12/09 21:56:30 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,12 @@ typedef struct t_player
 	double			rotationangle;
 	double			movespeed;
 	double			rotationspeed;
-	// bool			key_w;
-	// bool			key_a;
-	// bool			key_s;
-	// bool			key_d;
-	// bool			key_left;
-	// bool			key_right;
+	bool			key_w;
+	bool			key_a;
+	bool			key_s;
+	bool			key_d;
+	bool			key_left;
+	bool			key_right;
 	double			new_x;
 	double			new_y;
 }t_player;
@@ -53,6 +53,7 @@ typedef struct s_rays
 }t_rays;
 
 /*---------------------------parsing---------------------------------*/
+/*---------------------------parsing---------------------------------*/
 
 typedef struct s_map
 {
@@ -63,6 +64,7 @@ typedef struct s_map
 	int		p_x;
 	int		p_y;
 	char 	p_direction;
+	int		player_count;
 	char	*map_path;
 	int		map_width;
 	int		map_height;
@@ -95,5 +97,6 @@ char	**original_split(char const *s, char c);
 
 int		read_and_check(t_map *map);
 void	*ft_calloc(int count, int size);
+/*---------------------------parsing---------------------------------*/
 /*---------------------------parsing---------------------------------*/
 #endif

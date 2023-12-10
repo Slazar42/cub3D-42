@@ -6,7 +6,7 @@
 /*   By: slazar <slazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/19 22:33:05 by slazar            #+#    #+#             */
-/*   Updated: 2023/12/01 14:53:10 by slazar           ###   ########.fr       */
+/*   Updated: 2023/12/10 16:11:01 by slazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -336,7 +336,7 @@ void	map_in_m(t_map **map)
 	while ((*map)->map[++i])
 		if (map_1_0((*map)->map[i]))
 			break;
-	while ((*map)->map[--(*map)->map_height])
+	while ((*map)->map[--(*map)->map_height] && (*map)->map_height > i)
 		if (map_1_0((*map)->map[(*map)->map_height]))
 			break;
 	(*map)->m_size = (*map)->map_height - i + 1;
@@ -352,6 +352,7 @@ void	map_positions(t_map *map)
 	int	j;
 
 	i = -1;
+	map->player_count = 0;
 	while (map->m[++i])
 	{
 		j = -1;
@@ -363,9 +364,12 @@ void	map_positions(t_map *map)
 				map->p_x = i;
 				map->p_y = j;
 				map->p_direction = map->m[i][j];
+				map->player_count++;
 			}
 		}
 	}
+	if (map->player_count != 1)
+		ft_error("\x1b[31mError\n\x1b[0mInvalid player position\n");
 }
 void	map_test(t_map *map)
 {
